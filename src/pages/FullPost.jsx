@@ -13,8 +13,6 @@ export const FullPost = () => {
   const [data, setData] = React.useState({});
   const [isLoading, setIsLoading] = React.useState(true);
 
-  console.log(id);
-
   React.useEffect(() => {
     setIsLoading(true);
 
