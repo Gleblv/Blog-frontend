@@ -3,7 +3,7 @@ import TextField from '@mui/material/TextField';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import SimpleMDE from 'react-simplemde-editor';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import axios from '../../axios';
 
@@ -16,6 +16,7 @@ import styles from './AddPost.module.scss';
 
 export const AddPost = () => {
   const navigation = useNavigate();
+  const { id } = useParams();
 
   const isAuth = useSelector(selectIsAuth);
 
@@ -26,6 +27,8 @@ export const AddPost = () => {
   const [isLoading, setIsLoading] = React.useState(false);
 
   const inputFile = React.useRef(null);
+
+  const isEditing = Boolean(id);
 
   const handleChangeFile = async (e) => {
     try {
@@ -62,11 +65,13 @@ export const AddPost = () => {
         text: value,
       };
 
-      const { data } = await axios.post('/posts', fields);
+      const { data } = isEditing
+        ? await axios.patch(`/posts/${id}`, fields)
+        : await axios.post('/posts', fields);
 
-      const id = data._id;
+      const _id = isEditing ? id : data._id;
 
-      navigation(`/post/${id}`);
+      navigation(`/post/${_id}`);
     } catch (err) {
       console.log(err);
     }
@@ -86,6 +91,20 @@ export const AddPost = () => {
     }),
     [],
   );
+
+  React.useEffect(() => {
+    if (id) {
+      axios
+        .get(`/posts/${id}`)
+        .then(({ data }) => {
+          setTitle(data.title);
+          setImageUrl(data.imageUrl);
+          setTags(data.tags.join(','));
+          setValue(data.text);
+        })
+        .catch((err) => console.log(err));
+    }
+  }, []);
 
   if (!window.localStorage.getItem('token') && !isAuth) {
     return <Navigate to="/" />;
@@ -126,7 +145,7 @@ export const AddPost = () => {
       <SimpleMDE className={styles.editor} value={value} onChange={onChange} options={options} />
       <div className={styles.buttons}>
         <Button onClick={onSubmit} size="large" variant="contained">
-          Опубликовать
+          {isEditing ? 'Редактировать' : 'Опубликовать'}
         </Button>
         <a href="/">
           <Button size="large">Отмена</Button>
