@@ -18,8 +18,27 @@ export const Home = () => {
   const { posts, tags } = useSelector((state) => state.posts);
   const userData = useSelector((state) => state.auth.data);
 
+  const [filter, setFilter] = React.useState('default');
+
   const isPostsLoading = posts.status === 'loading';
   const isTagsLoading = tags.status === 'loading';
+
+  const selectArray = () => {
+    console.log(posts.items.length);
+
+    if (!posts.items.length) {
+      return [];
+    }
+
+    const items = [...posts.items]
+
+    switch(filter) {
+      case 'default':
+       return items.reverse();
+      case 'popular':
+        return items.sort((a, b) => b.viewsCount - a.viewsCount);
+    }
+  }
 
   React.useEffect(() => {
     dispatch(fetchPosts());
@@ -28,13 +47,13 @@ export const Home = () => {
 
   return (
     <>
-      <Tabs style={{ marginBottom: 15 }} value={0} aria-label="basic tabs example">
-        <Tab label="Новые" />
-        <Tab label="Популярные" />
+      <Tabs style={{ marginBottom: 15 }} value={filter === 'default' ? 0 : 1} aria-label="basic tabs example">
+        <Tab onClick={() => setFilter('default')} label="Новые" />
+        <Tab onClick={() => setFilter('popular')} label="Популярные" />
       </Tabs>
       <Grid container spacing={4}>
         <Grid xs={8} item>
-          {(isPostsLoading ? Array(5) : posts.items).map((item, i) =>
+          {(isPostsLoading ? Array(5) : selectArray()).map((item, i) =>
             isPostsLoading ? (
               <Post key={i} isLoading={true} />
             ) : (
