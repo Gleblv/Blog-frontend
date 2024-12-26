@@ -16,6 +16,7 @@ export const Home = () => {
   const dispatch = useDispatch();
 
   const { posts, tags } = useSelector((state) => state.posts);
+  const userData = useSelector((state) => state.auth.data);
 
   const isPostsLoading = posts.status === 'loading';
   const isTagsLoading = tags.status === 'loading';
@@ -49,7 +50,7 @@ export const Home = () => {
                 viewsCount={item.viewsCount}
                 commentsCount={150}
                 tags={item.tags}
-                isEditable
+                isEditable={userData?._id === item.user._id}
               />
             ),
           )}
