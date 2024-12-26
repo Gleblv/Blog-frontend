@@ -39,6 +39,7 @@ export const Home = () => {
               <Post key={i} isLoading={true} />
             ) : (
               <Post
+                key={item._id}
                 id={item._id}
                 title={item.title}
                 imageUrl={item.imageUrl}
